@@ -4,6 +4,9 @@ This project aims to develop a personalized movie recommender system that delive
 # Main.py
 Gathers all the movie scores from four submodules and weights them according to the relevance of each submodule to derive a final score to be sorted. From the sorted list the first five movies are chosen as the user recommendations.
 
+# Data_Processing.py
+Contains a class that processes dataset returning different fields that could be relevant for submodules 
+
 # Submodule_01.py - 
 
 # Submodule_02.py - 
