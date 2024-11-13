@@ -3,11 +3,15 @@ import submodule_02
 import submodule_03
 import submodule_04
 
-# Define the movie titles (indexed by position)
-movie_titles = [
-    "Movie A", "Movie B", "Movie C", "Movie D", "Movie E",
-    "Movie F", "Movie G", "Movie H", "Movie I", "Movie J"
-]
+from data_processing import MovieDataset
+
+# Load Dataset Class
+path_Nikola = '/root/.cache/kagglehub/datasets/kashifsahil/16000-movies-1910-2024-metacritic/versions/1/16k_Movies.csv'
+movies = MovieDataset(dataset_path=path_Nikola)
+
+# Extract Movie Titles
+movie_titles = movies.get_movie_titles(num_titles=10)
+print(f"{movie_titles}")
 
 # Define weights for each module based on importance
 weights = {

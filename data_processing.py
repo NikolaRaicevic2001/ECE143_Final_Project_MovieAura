@@ -2,13 +2,6 @@ import kagglehub
 import pandas as pd
 
 #########################
-######## Dataset ########
-#########################
-# 16000+ Movies 1910-2024 (Metacritic)
-path = kagglehub.dataset_download("kashifsahil/16000-movies-1910-2024-metacritic")
-print("Path to dataset files:", path)
-
-#########################
 ##### Processing ########
 #########################
 class MovieDataset:
@@ -68,20 +61,28 @@ class MovieDataset:
         movie = self.df[self.df['Title'] == title]
         return movie.iloc[0] if not movie.empty else None
 
-# Example usage
-path_Nikola = '/root/.cache/kagglehub/datasets/kashifsahil/16000-movies-1910-2024-metacritic/versions/1/16k_Movies.csv'
-movies = MovieDataset(dataset_path=path_Nikola)
+if __name__ == "__main__":
+    #########################
+    ######## Dataset ########
+    #########################
+    # # 16000+ Movies 1910-2024 (Metacritic)
+    # path = kagglehub.dataset_download("kashifsahil/16000-movies-1910-2024-metacritic")
+    # print("Path to dataset files:", path)
 
-# Display column names
-print("Column Names:", movies.get_column_names())
+    # Example usage
+    path_Nikola = '/root/.cache/kagglehub/datasets/kashifsahil/16000-movies-1910-2024-metacritic/versions/1/16k_Movies.csv'
+    movies = MovieDataset(dataset_path=path_Nikola)
 
-# Display first 10 movie titles
-print("First 10 Movie Titles:", movies.get_movie_titles())
+    # Display column names
+    print("Column Names:", movies.get_column_names())
 
-# Filter movies released between 2000 and 2010
-filtered_movies = movies.filter_by_year(2000, 2005)
-print("Movies from 2000 to 2010:\n", filtered_movies.head())
+    # Display first 10 movie titles
+    print("First 10 Movie Titles:", movies.get_movie_titles())
 
-# Get details for a specific movie
-movie_info = movies.get_movie_info("Inception")
-print("Movie Information:\n", movie_info)
+    # Filter movies released between 2000 and 2010
+    filtered_movies = movies.filter_by_year(2000, 2005)
+    print("Movies from 2000 to 2010:\n", filtered_movies.head())
+
+    # Get details for a specific movie
+    movie_info = movies.get_movie_info("Inception")
+    print("Movie Information:\n", movie_info)
