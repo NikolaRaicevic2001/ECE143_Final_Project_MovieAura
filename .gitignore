@@ -1,6 +1,5 @@
 # Directories
 Dataset_Processed/
-NN_Models/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
