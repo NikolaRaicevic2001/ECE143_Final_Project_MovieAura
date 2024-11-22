@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # Load the dataset
-file_path = 'Movies_Merged.csv'
+file_path = 'Datasets/Movies_Merged.csv'
 movies_data = pd.read_csv(file_path)
 
 #Content Based Filtering
