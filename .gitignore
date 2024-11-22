@@ -1,3 +1,8 @@
+# Directories
+Dataset_Processed/
+Datasets/
+NN_Models/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
