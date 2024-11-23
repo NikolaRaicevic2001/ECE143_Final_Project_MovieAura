@@ -1,4 +1,5 @@
 # Directories to ignore
+Dataset_Processed/Movie_Embeddings.pkl
 Datasets/16k_Movies.csv
 Datasets/TMDB_movie_dataset_v11.csv
 
