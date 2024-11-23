@@ -1,5 +1,3 @@
-import torch
-
 SEQ_LEN = 20            # Number of past movies to consider
 EMBEDDING_DIM = 128     # Dimension of the movie embedding
 BATCH_SIZE = 32         # Number of samples per batch

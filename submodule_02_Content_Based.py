@@ -42,6 +42,9 @@ def get_movie_scores(movie_titles, path):
     # Aggregate similarity scores for all provided movies
     aggregated_scores = sum(cosine_similarity(tfidf_matrix[idx], tfidf_matrix).flatten() for idx in input_indices)
 
+    # Normalize the aggregated scores
+    aggregated_scores = aggregated_scores / (sum(aggregated_scores) + 1e-6)
+
     return aggregated_scores
 
 # example_movie = ['The Godfather', 'The Traitor']

@@ -1,3 +1,7 @@
+# Directories to ignore
+Datasets/16k_Movies.csv
+Datasets/TMDB_movies_datasets_v11.csv
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
