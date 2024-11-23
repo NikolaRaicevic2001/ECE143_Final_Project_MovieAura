@@ -33,7 +33,17 @@ tfidf_vectorizer = TfidfVectorizer(stop_words='english')
 tfidf_matrix = tfidf_vectorizer.fit_transform(movies_data['combined_features'])
 
 #Function can receive any number of inputs and returns 10 moviews 
-def get_recommendations_multi_content_based(movie_titles, tfidf_matrix=tfidf_matrix, top_n=10):
+def get_movie_scores(movie_titles, tfidf_matrix=tfidf_matrix):
+    """
+    Calculate similarity scores for all movies in the dataset based on the input movie titles.
+
+    Parameters:
+        movie_titles (list or str): A single movie title or a list of movie titles.
+        tfidf_matrix (sparse matrix): TF-IDF matrix for all movies.
+
+    Returns:
+        np.ndarray: A vector of similarity scores for each movie in the dataset, in the same order as the dataset.
+    """
     # Ensure movie_titles is a list
     if isinstance(movie_titles, str):
         movie_titles = [movie_titles]
@@ -43,26 +53,18 @@ def get_recommendations_multi_content_based(movie_titles, tfidf_matrix=tfidf_mat
     input_indices = [indices.get(title) for title in movie_titles if title in indices]
     
     if not input_indices:
-        return f"None of the provided movies are found in the dataset."
+        raise ValueError("None of the provided movies are found in the dataset.")
     
     # Aggregate similarity scores for all provided movies
     aggregated_scores = sum(cosine_similarity(tfidf_matrix[idx], tfidf_matrix).flatten() for idx in input_indices)
     
-    # Get top N similar movies, excluding input movies
-    sim_scores_indices = aggregated_scores.argsort()[-top_n - len(input_indices):][::-1]
-    sim_scores_indices = [i for i in sim_scores_indices if i not in input_indices][:top_n]
-    
-    # Prepare recommendations as a dictionary
-    recommendations = {
-        movies_data.iloc[i]['Title']: round(aggregated_scores[i], 3) for i in sim_scores_indices
-    }
-    
-    return recommendations
+    # Return the vector of scores
+    return aggregated_scores
 
-example_movie = ['The Godfather', 'The Traitor']
-recommendations = get_recommendations_multi_content_based(example_movie)
-print(recommendations)
+# example_movie = ['The Godfather', 'The Traitor']
+# recommendations = get_movie_scores(example_movie)
+# print(recommendations)
 
-example_movie = ['The Martian', 'Red Planet']
-recommendations = get_recommendations_multi_content_based(example_movie)
-print(recommendations)
+# example_movie = ['The Martian', 'Red Planet']
+# recommendations = get_movie_scores(example_movie)
+# print(recommendations)
