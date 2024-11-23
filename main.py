@@ -1,24 +1,29 @@
-import submodule_01
+# import submodule_01
 import submodule_02_Content_Based
 # import submodule_03
 import submodule_04_Transformer 
 
 # Define weights for each module based on importance
 weights = {
-    'submodule_01': 0.5,
-    'submodule_02': 0.5,
-    'submodule_03': 0.5,
-    'submodule_04': 0.5,
+    'submodule_01': 1,
+    'submodule_02': 1,
+    'submodule_03': 1,
+    'submodule_04': 10,
 }
 
 def main():
-    # Example sequence of movie titles (representing a user's watch history)
-    movie_sequence = ['Three Colors: Red', 'The Godfather', 'The Shawshank Redemption', 'The Dark Knight', 'Pulp Fiction',
-                       'The Lord of the Rings: The Return of the King', 'The Lord of the Rings: The Fellowship of the Ring', 
-                       'The Lord of the Rings: The Two Towers', 'The Matrix', 'The Dark Knight Rises', 'Inception', 'Interstellar',
-                       'Django Unchained', 'The Prestige', 'The Departed', 'The Green Mile', 'The Lion King','The Truman Show',
-                       'The Silence of the Lambs', 'The Usual Suspects']
+    # # Random Movies
+    # movie_sequence = ['Three Colors: Red', 'The Godfather', 'The Shawshank Redemption', 'The Dark Knight', 'Pulp Fiction',
+    #                    'The Lord of the Rings: The Return of the King', 'The Lord of the Rings: The Fellowship of the Ring', 
+    #                    'The Lord of the Rings: The Two Towers', 'The Matrix', 'The Dark Knight Rises', 'Inception', 'Interstellar',
+    #                    'Django Unchained', 'The Prestige', 'The Departed', 'The Green Mile', 'The Lion King','The Truman Show',
+    #                    'The Silence of the Lambs', 'The Usual Suspects']
     
+    # Action/Adventure/Fantasy Movies
+    movie_sequence = ['The Lord of the Rings: The Return of the King', 'The Lord of the Rings: The Fellowship of the Ring','The Lord of the Rings: The Two Towers',
+                      'The Matrix', 'The Dark Knight Rises', 'Interstellar','Django Unchained', 'The Godfather', 'The Shawshank Redemption', 'The Dark Knight',
+                      'The Hobbit: An Unexpected Journey', 'The Hobbit: The Desolation of Smaug', 'The Hobbit: The Battle of the Five Armies']
+
     # Load movie embeddings
     _, movie_embeddings = submodule_04_Transformer.get_movie_embeddings('Dataset_Processed/Movie_Embeddings.pkl',movie_sequence)
     movie_titles = movie_embeddings['Title'].values
@@ -30,8 +35,15 @@ def main():
     scores4 = submodule_04_Transformer.get_movie_scores(movie_sequence)
     
     print("Shapes of the scores:")
-    print("Scores ({}) for Content Based:{}".format(scores2.shape, scores2[:10]))
-    print("Scores ({}) for Transformer:{}".format(scores4.shape, scores4[:10]))
+    print("Scores shape for Content Based:{}".format(scores2.shape))
+    print("Scores shape for Transformer:{}".format(scores4.shape))
+
+    # Top 10 movies based on each submodule
+    print("\nTop 10 Movie Recommendations based on each submodule:")
+    top_indices_content_based = scores2.argsort()[::-1][:10]
+    print("Top 10 Movie Recommendations based on Content Based: {} = {}".format(movie_titles[top_indices_content_based], scores2[top_indices_content_based]))
+    top_indices_transformer = scores4.argsort()[::-1][:10]
+    print("Top 10 Movie Recommendations based on Transformer: {} = {}".format(movie_titles[top_indices_transformer], scores4[top_indices_transformer]))
 
     # Compute weighted score for each movie
     weighted_scores = [
@@ -52,7 +64,7 @@ def main():
     # Display the top five recommended movies
     print("Top 5 Movie Recommendations:")
     for title, score in top_movies:
-        print(f"{title}: {score:.2f}")
+        print(f"{title}: {score:.4e}")
 
 if __name__ == "__main__":
     main()
