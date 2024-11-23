@@ -24,14 +24,14 @@ def main():
     movie_titles = movie_embeddings['Title'].values
 
     # Retrieve scores from each module
-    # scores1 = submodule_01.get_movie_scores(movie_sequence)
+    scores1 = submodule_01.get_movie_scores(movie_sequence)
     # scores2 = submodule_02.get_movie_scores(movie_sequence)
     # scores3 = submodule_03.get_movie_scores(movie_sequence)
     scores4 = submodule_04_Transformer.get_movie_scores(movie_sequence)
     
     # Compute weighted score for each movie
     weighted_scores = [
-        # scores1[i] * weights['submodule_01'] +
+        scores1[i] * weights['submodule_01'] +
         # scores2[i] * weights['submodule_02'] +
         # scores3[i] * weights['submodule_03'] +
         scores4[i] * weights['submodule_04']
