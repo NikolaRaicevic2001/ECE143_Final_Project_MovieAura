@@ -111,7 +111,7 @@ def get_movie_scores(movie_sequence):
     model.to(device)
 
     # Load movie embeddings
-    feature_vectors, movie_embeddings = get_movie_embeddings('Dataset_Processed/Movie_Embeddings.pkl',movie_sequence)
+    feature_vectors, _ = get_movie_embeddings('Dataset_Processed/Movie_Embeddings.pkl',movie_sequence)
 
     model.eval()
     with torch.no_grad():

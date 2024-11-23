@@ -4,11 +4,6 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.decomposition import TruncatedSVD
 import numpy as np
 import matplotlib.pyplot as plt
-import seaborn as sns
-
-# Load the dataset
-file_path = './Datasets/Movies_Merged.csv'
-movies_data = pd.read_csv(file_path)
 
 #Content Based Filtering
 # Enhance combined features with weights
@@ -23,27 +18,16 @@ def combine_features_with_weights(row, genre_weight=2, keyword_weight=3):
     
     return f"{description} {genres} {keywords} {tagline} {written_by} {directed_by}"
 
+#Function can receive any number of inputs 
+def get_movie_scores(movie_titles, path):
+    # Load the dataset
+    movies_data = pd.read_csv(path)
+    movies_data['combined_features'] = movies_data.apply(combine_features_with_weights, axis=1)
 
-movies_data['combined_features'] = movies_data.apply(
-    combine_features_with_weights, axis=1
-)
+    # Vectorize the combined features
+    tfidf_vectorizer = TfidfVectorizer(stop_words='english')
+    tfidf_matrix = tfidf_vectorizer.fit_transform(movies_data['combined_features'])
 
-# Vectorize the combined features
-tfidf_vectorizer = TfidfVectorizer(stop_words='english')
-tfidf_matrix = tfidf_vectorizer.fit_transform(movies_data['combined_features'])
-
-#Function can receive any number of inputs and returns 10 moviews 
-def get_movie_scores(movie_titles, tfidf_matrix=tfidf_matrix):
-    """
-    Calculate similarity scores for all movies in the dataset based on the input movie titles.
-
-    Parameters:
-        movie_titles (list or str): A single movie title or a list of movie titles.
-        tfidf_matrix (sparse matrix): TF-IDF matrix for all movies.
-
-    Returns:
-        np.ndarray: A vector of similarity scores for each movie in the dataset, in the same order as the dataset.
-    """
     # Ensure movie_titles is a list
     if isinstance(movie_titles, str):
         movie_titles = [movie_titles]
@@ -57,14 +41,13 @@ def get_movie_scores(movie_titles, tfidf_matrix=tfidf_matrix):
     
     # Aggregate similarity scores for all provided movies
     aggregated_scores = sum(cosine_similarity(tfidf_matrix[idx], tfidf_matrix).flatten() for idx in input_indices)
-    
-    # Return the vector of scores
+
     return aggregated_scores
 
 # example_movie = ['The Godfather', 'The Traitor']
-# recommendations = get_movie_scores(example_movie)
+# recommendations = get_recommendations_multi_content_based(example_movie)
 # print(recommendations)
 
 # example_movie = ['The Martian', 'Red Planet']
-# recommendations = get_movie_scores(example_movie)
+# recommendations = get_recommendations_multi_content_based(example_movie)
 # print(recommendations)
