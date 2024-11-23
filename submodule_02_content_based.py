@@ -37,7 +37,7 @@ def get_movie_scores(movie_titles, path):
     input_indices = [indices.get(title) for title in movie_titles if title in indices]
     
     if not input_indices:
-        return f"None of the provided movies are found in the dataset."
+        raise ValueError("None of the provided movies are found in the dataset.")
     
     # Aggregate similarity scores for all provided movies
     aggregated_scores = sum(cosine_similarity(tfidf_matrix[idx], tfidf_matrix).flatten() for idx in input_indices)
