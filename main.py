@@ -32,7 +32,7 @@ def main():
     # scores1 = submodule_01.get_movie_scores(movie_sequence)
     scores2 = submodule_02_Content_Based.get_movie_scores(movie_sequence, path='./Datasets/Movies_Merged.csv')
     # scores3 = submodule_03.get_movie_scores(movie_sequence)
-    scores4 = submodule_04_Transformer.get_movie_scores(movie_sequence)
+    scores4 = submodule_04_Transformer.get_movie_scores(movie_sequence, model_path='NN_Models/TransformerRecModel_20.pth')
     
     print("Shapes of the scores:")
     print("Scores shape for Content Based:{}".format(scores2.shape))
