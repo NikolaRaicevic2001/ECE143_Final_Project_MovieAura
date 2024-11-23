@@ -14,7 +14,6 @@ Contains a class that processes dataset returning different fields that could be
 This submodule implements a **Content-Based Filtering** system to recommend movies based on weighted features. It enhances movie attributes and calculates similarity scores to identify similar movies.
 
 ### Key Features
-
 1. **Feature Combination with Weights**  
    Combines multiple attributes of a movie (e.g., genres, keywords, description) into a weighted string for better similarity calculations. Default weights are:
    - **Genre**: 2  
@@ -26,7 +25,7 @@ This submodule implements a **Content-Based Filtering** system to recommend movi
 
 3. **Similarity Calculation**  
    Computes cosine similarity scores between movies based on their feature vectors. Supports aggregated similarity scores for multiple input movie titles.
-
+   
 4. **Flexible Input**  
    Accepts one or more movie titles and computes similarity scores against all movies in the dataset.
 
@@ -40,4 +39,9 @@ This submodule implements a **Content-Based Filtering** system to recommend movi
 
 # Submodule_04.py - 
 
+This submodule implements **Transformer Encoder** system to recommend movies based on numerical features. The model used is SASRec/BERT4Rec based Transformer-based arhitecture designed specifically for recommendation tasks. The model uses self-attention mechanism to model user sequence and can handle both sequential dependancies (past movies) and incorporate information or context based embeddings. 
+
+ - **Input Format**: The list of movies with their specific numerical embeddings including Adult movie, Genres, Production Country, Keywords, Description, Rating, Popularity, and Release Year. The Adult category was binary either true/false; Genres and Production Country was one-hot encoded; Rating, Popularity, and Release Year was normalized so that the features are in the range of 0 to 1; Keywords and Description features were extracted using pre-trained language model BERT to create a dense vector representation.
+
+ - **Output Format**: The model generates sequence of logits which are scores for each movie to be corrolated with the input sequence of the movies. The softmax function is later used to generate a probability distribution over the potential next movies based on the sequence and contextual information.
 
