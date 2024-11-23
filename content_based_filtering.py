@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # Load the dataset
-file_path = 'Datasets/Movies_Merged.csv'
+file_path = './Datasets/Movies_Merged.csv'
 movies_data = pd.read_csv(file_path)
 
 #Content Based Filtering
@@ -23,7 +23,7 @@ def combine_features_with_weights(row, genre_weight=2, keyword_weight=3):
     
     return f"{description} {genres} {keywords} {tagline} {written_by} {directed_by}"
 
-# Fill missing values and apply enhanced feature combination
+
 movies_data['combined_features'] = movies_data.apply(
     combine_features_with_weights, axis=1
 )
@@ -32,32 +32,37 @@ movies_data['combined_features'] = movies_data.apply(
 tfidf_vectorizer = TfidfVectorizer(stop_words='english')
 tfidf_matrix = tfidf_vectorizer.fit_transform(movies_data['combined_features'])
 
-# Enhanced recommendation function
-def get_recommendations_content_based(movie_title, tfidf_matrix=tfidf_matrix, top_n=10):
-    # Find the index of the movie that matches the title
+#Function can receive any number of inputs and returns 10 moviews 
+def get_recommendations_multi_content_based(movie_titles, tfidf_matrix=tfidf_matrix, top_n=10):
+    # Ensure movie_titles is a list
+    if isinstance(movie_titles, str):
+        movie_titles = [movie_titles]
+    
+    # Find indices of the input movies
     indices = pd.Series(movies_data.index, index=movies_data['Title']).drop_duplicates()
-    idx = indices.get(movie_title)
+    input_indices = [indices.get(title) for title in movie_titles if title in indices]
     
-    if idx is None:
-        return f"Movie '{movie_title}' not found in the dataset."
+    if not input_indices:
+        return f"None of the provided movies are found in the dataset."
     
-    # Compute cosine similarity
-    sim_scores = cosine_similarity(tfidf_matrix[idx], tfidf_matrix).flatten()
+    # Aggregate similarity scores for all provided movies
+    aggregated_scores = sum(cosine_similarity(tfidf_matrix[idx], tfidf_matrix).flatten() for idx in input_indices)
     
-    # Get top N similar movies
-    sim_scores_indices = sim_scores.argsort()[-top_n - 1 : -1][::-1]
+    # Get top N similar movies, excluding input movies
+    sim_scores_indices = aggregated_scores.argsort()[-top_n - len(input_indices):][::-1]
+    sim_scores_indices = [i for i in sim_scores_indices if i not in input_indices][:top_n]
     
     # Prepare recommendations as a dictionary
     recommendations = {
-        movies_data.iloc[i]['Title']: round(sim_scores[i], 3) for i in sim_scores_indices
+        movies_data.iloc[i]['Title']: round(aggregated_scores[i], 3) for i in sim_scores_indices
     }
     
     return recommendations
 
-example_movie1 = "The Godfather"
-recommendations = get_recommendations_content_based(example_movie1)
-print(f"Recommendation for {example_movie1} are {recommendations}")
+example_movie = ['The Godfather', 'The Traitor']
+recommendations = get_recommendations_multi_content_based(example_movie)
+print(recommendations)
 
-example_movie2 = "The Martian"
-recommendations = get_recommendations_content_based(example_movie2)
-print(f"Recommendation for {example_movie2} are {recommendations}")
+example_movie = ['The Martian', 'Red Planet']
+recommendations = get_recommendations_multi_content_based(example_movie)
+print(recommendations)
