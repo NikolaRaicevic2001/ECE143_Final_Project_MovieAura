@@ -4,7 +4,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from rank_bm25 import BM25Okapi
 
 # Load movie data
-file_path = "Movies_Merged.csv"
+file_path = './Datasets/Movies_Merged.csv'
 movies_data = pd.read_csv(file_path)
 
 
