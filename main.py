@@ -1,17 +1,16 @@
 import submodule_01
 import submodule_02
 import submodule_03
-import submodule_04
+import submodule_04 
 
-from data_processing import MovieDataset
+# from data_processing import MovieDataset
 
 # Load Dataset Class
-path_Nikola = '/root/.cache/kagglehub/datasets/kashifsahil/16000-movies-1910-2024-metacritic/versions/1/16k_Movies.csv'
-movies = MovieDataset(dataset_path=path_Nikola)
+# movies = MovieDataset(dataset_path=path_Nikola)
 
 # Extract Movie Titles
-movie_titles = movies.get_movie_titles(num_titles=10)
-print(f"{movie_titles}")
+# movie_titles = movies.get_movie_titles(num_titles=10)
+# print(f"{movie_titles}")
 
 # Define weights for each module based on importance
 weights = {
@@ -22,19 +21,30 @@ weights = {
 }
 
 def main():
+    # Example sequence of movie titles (representing a user's watch history)
+    movie_sequence = ['Three Colors: Red', 'The Godfather', 'The Shawshank Redemption', 'The Dark Knight', 'Pulp Fiction',
+                       'The Lord of the Rings: The Return of the King', 'The Lord of the Rings: The Fellowship of the Ring', 
+                       'The Lord of the Rings: The Two Towers', 'The Matrix', 'The Dark Knight Rises', 'Inception', 'Interstellar',
+                       'Django Unchained', 'The Prestige', 'The Departed', 'The Green Mile', 'The Lion King','The Truman Show',
+                       'The Silence of the Lambs', 'The Usual Suspects', 'The Pianist', 'The Sixth Sense']
+    
+    # Load movie embeddings
+    _, movie_embeddings = submodule_04.get_movie_embeddings('Dataset_Processed/Movie_Embeddings.pkl',movie_sequence)
+    movie_titles = movie_embeddings['Title'].values
+
     # Retrieve scores from each module
-    scores1 = submodule_01.get_movie_scores()
-    scores2 = submodule_02.get_movie_scores()
-    scores3 = submodule_03.get_movie_scores()
-    scores4 = submodule_04.get_movie_scores()
+    # scores1 = submodule_01.get_movie_scores(movie_sequence)
+    # scores2 = submodule_02.get_movie_scores(movie_sequence)
+    # scores3 = submodule_03.get_movie_scores(movie_sequence)
+    scores4 = submodule_04.get_movie_scores(movie_sequence)
     
     # Compute weighted score for each movie
     weighted_scores = [
-        scores1[i] * weights['submodule_01'] +
-        scores2[i] * weights['submodule_02'] +
-        scores3[i] * weights['submodule_03'] +
+        # scores1[i] * weights['submodule_01'] +
+        # scores2[i] * weights['submodule_02'] +
+        # scores3[i] * weights['submodule_03'] +
         scores4[i] * weights['submodule_04']
-        for i in range(len(scores1))
+        for i in range(len(scores4))
     ]
     
     # Pair movie titles with their scores

@@ -103,7 +103,16 @@ def evaluate_model(model, dataloader, criterion, device):
 
     return avg_loss, accuracy, precision, recall, f1
 
-def get_movie_scores(model, feature_vectors, device):
+def get_movie_scores(movie_sequence):
+    # Load the saved model
+    model = TransformerRecModel(num_movies=NUM_MOVIES, input_dim=INPUT_DIM, sequence_len=SEQ_LEN, embedding_dim=EMBEDDING_DIM, num_heads=NUM_HEADS, num_layers=NUM_LAYERS)
+    model.load_state_dict(torch.load('NN_Models/TransformerRecModel_20.pth', weights_only=True))
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model.to(device)
+
+    # Load movie embeddings
+    feature_vectors, movie_embeddings = get_movie_embeddings('Dataset_Processed/Movie_Embeddings.pkl',movie_sequence)
+
     model.eval()
     with torch.no_grad():
         # Ensure we have a fixed length (SEQ_LEN)
@@ -151,18 +160,12 @@ if __name__ == "__main__":
                        'Django Unchained', 'The Prestige', 'The Departed', 'The Green Mile', 'The Lion King','The Truman Show',
                        'The Silence of the Lambs', 'The Usual Suspects', 'The Pianist', 'The Sixth Sense']
 
-    # Load the saved model
-    model = TransformerRecModel(num_movies=NUM_MOVIES, input_dim=INPUT_DIM, sequence_len=SEQ_LEN, embedding_dim=EMBEDDING_DIM, num_heads=NUM_HEADS, num_layers=NUM_LAYERS)
-    model.load_state_dict(torch.load('NN_Models/TransformerRecModel_20.pth', weights_only=True))
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model.to(device)
+    print("Getting movie scores...")
+    probabilities = get_movie_scores(movie_sequence)
+    print(probabilities.shape)
 
     # Load movie embeddings
-    feature_vectors, movie_embeddings = get_movie_embeddings('Dataset_Processed/Movie_Embeddings.pkl',movie_sequence)
-
-    print("Getting movie scores...")
-    probabilities = get_movie_scores(model, feature_vectors, device)
-    print(probabilities.shape)
+    _, movie_embeddings = get_movie_embeddings('Dataset_Processed/Movie_Embeddings.pkl',movie_sequence)
 
     # Get top 5 movie recommendations
     top_indices = probabilities.argsort()[::-1][:5]
