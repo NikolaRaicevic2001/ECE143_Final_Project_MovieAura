@@ -1,16 +1,7 @@
 import submodule_01
-import submodule_02
+import submodule_02_Content_Based
 import submodule_03
-import submodule_04 
-
-# from data_processing import MovieDataset
-
-# Load Dataset Class
-# movies = MovieDataset(dataset_path=path_Nikola)
-
-# Extract Movie Titles
-# movie_titles = movies.get_movie_titles(num_titles=10)
-# print(f"{movie_titles}")
+import submodule_04_Transformer 
 
 # Define weights for each module based on importance
 weights = {
@@ -29,14 +20,14 @@ def main():
                        'The Silence of the Lambs', 'The Usual Suspects', 'The Pianist', 'The Sixth Sense']
     
     # Load movie embeddings
-    _, movie_embeddings = submodule_04.get_movie_embeddings('Dataset_Processed/Movie_Embeddings.pkl',movie_sequence)
+    _, movie_embeddings = submodule_04_Transformer.get_movie_embeddings('Dataset_Processed/Movie_Embeddings.pkl',movie_sequence)
     movie_titles = movie_embeddings['Title'].values
 
     # Retrieve scores from each module
     # scores1 = submodule_01.get_movie_scores(movie_sequence)
     # scores2 = submodule_02.get_movie_scores(movie_sequence)
     # scores3 = submodule_03.get_movie_scores(movie_sequence)
-    scores4 = submodule_04.get_movie_scores(movie_sequence)
+    scores4 = submodule_04_Transformer.get_movie_scores(movie_sequence)
     
     # Compute weighted score for each movie
     weighted_scores = [
