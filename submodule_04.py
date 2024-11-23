@@ -7,7 +7,7 @@ from sklearn.metrics import precision_score, recall_score, f1_score
 import pandas as pd
 import numpy as np
 
-from submodule_04_Constants import (SEQ_LEN,EMBEDDING_DIM,BATCH_SIZE,NUM_LAYERS,NUM_HEADS,LEARNING_RATE,DROPOUT_RATE,EPOCHS,INPUT_DIM,NUM_MOVIES,DEVICE)
+from submodule_04_Constants import (SEQ_LEN,EMBEDDING_DIM,BATCH_SIZE,NUM_LAYERS,NUM_HEADS,DROPOUT_RATE,EPOCHS,INPUT_DIM,NUM_MOVIES)
 
 #############################################################
 ### Define Transformer-Based Model (SASRec/BERT4Rec-like) ###
@@ -16,25 +16,33 @@ class TransformerRecModel(nn.Module):
     def __init__(self, num_movies=NUM_MOVIES, input_dim=INPUT_DIM, sequence_len=SEQ_LEN, embedding_dim=EMBEDDING_DIM, num_heads=NUM_HEADS, num_layers=NUM_LAYERS, dropout_rate=DROPOUT_RATE):
         super().__init__()
         self.input_projection = nn.Linear(input_dim, embedding_dim)
-        self.positional_embedding = nn.Embedding(sequence_len, embedding_dim)
-        self.encoder = nn.TransformerEncoder(nn.TransformerEncoderLayer(d_model=embedding_dim, nhead=num_heads, dropout=dropout_rate),num_layers=num_layers)
+        self.positional_embedding = nn.Parameter(torch.randn(1, sequence_len, embedding_dim))
+        encoder_layer = nn.TransformerEncoderLayer(d_model=embedding_dim, nhead=num_heads, dim_feedforward=embedding_dim * 4, dropout=dropout_rate, activation='gelu')
+        self.encoder = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
         self.output_layer = nn.Linear(embedding_dim, num_movies)
+        
+        # Initialize weights
+        self.apply(self._init_weights)
+
+    def _init_weights(self, module):
+        if isinstance(module, (nn.Linear, nn.Embedding)):
+            module.weight.data.normal_(mean=0.0, std=0.02)
+        if isinstance(module, nn.Linear) and module.bias is not None:
+            module.bias.data.zero_()
 
     def forward(self, features):
         # Project features into embedding space
         projected_features = self.input_projection(features)
 
         # Add positional embeddings
-        pos_indices = torch.arange(0, features.size(1), device=features.device).unsqueeze(0).repeat(features.size(0), 1)
-        positional_embedding = self.positional_embedding(pos_indices)
-        combined_embeds = projected_features + positional_embedding
-
+        embedded = projected_features + self.positional_embedding[:, :features.size(1), :]
+        
         # Apply transformer encoder
-        transformer_output = self.encoder(combined_embeds)
-
-        # Output probabilities for next movie (last position)
-        output = F.softmax(self.output_layer(transformer_output[:, -1]), dim=-1)
-        return output
+        transformer_output = self.encoder(embedded)
+        
+        # Output logits for next movie (last position)
+        logits = self.output_layer(transformer_output[:, -1])
+        return logits
 
 def train_model(model, dataloader, optimizer, criterion, device):
     model.train()
@@ -47,6 +55,10 @@ def train_model(model, dataloader, optimizer, criterion, device):
         output = model(features) 
         loss = criterion(output, targets)
         loss.backward()
+
+        # Gradient clipping
+        torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+        
         optimizer.step()
         total_loss += loss.item()
 
@@ -94,7 +106,6 @@ def evaluate_model(model, dataloader, criterion, device):
 def get_movie_scores(model, feature_vectors, device):
     model.eval()
     with torch.no_grad():
-        
         # Ensure we have a fixed length (SEQ_LEN)
         if len(feature_vectors) < SEQ_LEN:
             # Create padding with zeros
@@ -107,8 +118,11 @@ def get_movie_scores(model, feature_vectors, device):
         input_tensor = torch.tensor(feature_vectors, dtype=torch.float).unsqueeze(0).to(device)  # Shape (1, SEQ_LEN, INPUT_DIM)
         
         # Get model output
-        output = model(input_tensor)
+        logits = model(input_tensor)
         
+        # Apply softmax to get probabilities
+        output = F.softmax(logits, dim=1)
+
         return output.squeeze().cpu().numpy() 
     
 def get_movie_embeddings(path, movie_sequence):
@@ -133,11 +147,13 @@ if __name__ == "__main__":
     # Example sequence of movie titles (representing a user's watch history)
     movie_sequence = ['Three Colors: Red', 'The Godfather', 'The Shawshank Redemption', 'The Dark Knight', 'Pulp Fiction',
                        'The Lord of the Rings: The Return of the King', 'The Lord of the Rings: The Fellowship of the Ring', 
-                       'The Lord of the Rings: The Two Towers', 'The Matrix', 'The Dark Knight Rises']
-    
+                       'The Lord of the Rings: The Two Towers', 'The Matrix', 'The Dark Knight Rises', 'Inception', 'Interstellar',
+                       'Django Unchained', 'The Prestige', 'The Departed', 'The Green Mile', 'The Lion King','The Truman Show',
+                       'The Silence of the Lambs', 'The Usual Suspects', 'The Pianist', 'The Sixth Sense']
+
     # Load the saved model
     model = TransformerRecModel(num_movies=NUM_MOVIES, input_dim=INPUT_DIM, sequence_len=SEQ_LEN, embedding_dim=EMBEDDING_DIM, num_heads=NUM_HEADS, num_layers=NUM_LAYERS)
-    model.load_state_dict(torch.load('NN_Models/TransformerRecModel_{}.pth'.format(EPOCHS), weights_only=True))
+    model.load_state_dict(torch.load('NN_Models/TransformerRecModel_20.pth', weights_only=True))
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
 
