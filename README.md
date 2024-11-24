@@ -35,7 +35,45 @@ This submodule implements a **Content-Based Filtering** system to recommend movi
 3. Compute cosine similarity scores between input movies and the dataset.
 4. Return aggregated similarity scores for user-specified movie titles.
 
-# Submodule_03.py - 
+# Submodule_03_Graph_Based.py -
+
+This submodule implements a **hybrid Graph-Based Filtering system** that combines **BM25/TF-IDF similarity** with the **PageRank algorithm** to recommend movies. It integrates both **textual** and **numeric features**, leveraging graph theory to refine and enhance recommendation quality.
+
+## **1. Features**
+
+### **Text Features**
+Incorporates a variety of movie attributes for textual similarity, with customizable weights:  
+- **Genres**: Weight = 2  
+- **Keywords**: Weight = 3  
+- **Description, Tagline, Written by, Directed by, Original Language, Production Companies**: Weight = 1 each  
+
+### **Numeric Features**  
+Includes numeric attributes for similarity calculations, normalized for consistency:  
+- **Release Year**: Weight = 0.1  
+- **Runtime**: Weight = 0.1  
+
+## **2. Text Information Retrieval**
+
+### **TF-IDF Vectorization**  
+Uses TF-IDF to process combined movie features, similar to Submodule_02.  
+
+### **BM25 Scoring**  
+Leverages BM25, a robust ranking function that emphasizes term relevance by accounting for term frequency and document length.  
+
+## **3. Numeric Information Processing**
+
+- **Normalization**: Applies `StandardScaler` from `sklearn.preprocessing` to normalize numeric features.  
+- **Similarity Calculation**: Computes **cosine similarity** between normalized numeric features to quantify similarity.
+
+## **4. Graph-Based Filtering with PageRank**
+
+- **Graph Construction**:  
+  - Treats movies as **nodes** and assigns **edge weights** based on combined BM25/TF-IDF and numeric similarity scores.  
+  - Ensures weights are normalized for balanced scoring.  
+
+- **PageRank Algorithm**:  
+  - Computes **global importance scores** for each movie.  
+  - Iteratively refines rankings based on graph connectivity, emphasizing both direct similarity and network-wide relationships.  
 
 # Submodule_04.py - 
 
