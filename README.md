@@ -67,28 +67,27 @@ This submodule implements a **Content-Based Filtering** system to recommend movi
 
 This submodule implements a **Graph-Based Filtering system** combining **BM25/TF-IDF similarity** with the **PageRank algorithm** to recommend movies, integrating both **textual** and **numeric features**.
 
-## **Features**
-### **Text Features**  
-Uses attributes with weighted importance:  
+### Key Features
+1. Text Features: Uses textual attributes with weighted importance:  
 - **Genres** (2), **Keywords** (3)  
 - **Description, Tagline, Written by, Directed by, Language, Companies** (1 each)
 
-### **Numeric Features**  
-Normalized attributes:  
+2. Numeric Features: Uses normalized numeric attributes:  
 - **Release Year** (0.1), **Runtime** (0.1)  
 
-## **Workflow**
-### **Text Similarity**  
+### How it works
+1. Text Similarity:
 - **TF-IDF Vectorization**: Uses TF-IDF to process combined movie features, similar to Submodule_02. 
 - **BM25 Scoring**: Leverages BM25, a robust ranking function that emphasizes term relevance by accounting for term frequency and document length.
 
-### **Numeric Similarity**  
+2. Numeric Similarity:
 - **Normalization**: Scales numeric features using `StandardScaler`.  
 - **Cosine Similarity**: Computes cosine similarity between normalized numeric features to quantify similarity.
 
-### **Graph Construction & PageRank**  
+3. Graph Construction & PageRank:
 - **Graph Nodes**: Treats movies as **nodes** and assigns **edge weights** based on combined BM25/TF-IDF and numeric similarity scores. 
 - **PageRank**: Computes **global importance scores** for each movie. Iteratively refines rankings based on graph connectivity, emphasizing both direct similarity and network-wide relationships. 
+
 
 # Submodule_04_Transformer.py
 
