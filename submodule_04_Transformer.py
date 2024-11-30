@@ -103,7 +103,7 @@ def evaluate_model(model, dataloader, criterion, device):
 
     return avg_loss, accuracy, precision, recall, f1
 
-def get_movie_scores(movie_sequence, model_path='NN_Models/TransformerRecModel_30.pth'):
+def get_movie_scores(movie_sequence, model_path='NN_Models_Transformer/TransformerRecModel_30.pth'):
     # Load the saved model
     model = TransformerRecModel(num_movies=NUM_MOVIES, input_dim=INPUT_DIM, sequence_len=SEQ_LEN, embedding_dim=EMBEDDING_DIM, num_heads=NUM_HEADS, num_layers=NUM_LAYERS)
     model.load_state_dict(torch.load(model_path, weights_only=True))
