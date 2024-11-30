@@ -4,6 +4,7 @@ This project aims to develop a personalized movie recommender system that delive
 ## File Structure
 - **`main.py`**: Top module which combines submodule.
 - **`Data_Processing.py`**: Merging different datasets and extract features.
+- **`Data_Visualization.ipynb`**: Jupyter Notebook for data visualization
 ### Submodules
 1. **`Submodule_01_Image_Based.py`**
 2. **`Submodule_02_Content_Based.py`**
@@ -23,6 +24,11 @@ The project utilizes the following Python libraries:
   - `torchvision` and `keras.applications`: For ResNet-50 embeddings.
 - **Graph-Based Algorithms**:
   - `networkx`: For graph construction and PageRank implementation.
+
+## Steps to Run
+`python main.py`
+
+For custom inputs : update `movie_sequence` in `main.py`
 
 # Main.py
 Gathers all the movie scores from four submodules and weights them according to the relevance of each submodule to derive a final score to be sorted. From the sorted list the first five movies are chosen as the user recommendations.
