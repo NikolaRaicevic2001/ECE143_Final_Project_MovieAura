@@ -29,18 +29,21 @@ def main():
     movie_titles = movie_embeddings['Title'].values
 
     # Retrieve scores from each module
-    scores1 = submodule_01_Image_Based.get_movie_scores(movie_sequence, feature_path='./PosterFeatures/movie_features_merge.npy')
+    scores1 = submodule_01_Image_Based.get_movie_scores(movie_sequence, feature_path='./PosterFeatures/movie_features_0.npy')
     scores2 = submodule_02_Content_Based.get_movie_scores(movie_sequence, path='./Datasets/Movies_Merged.csv')
     scores3 = submodule_03_Graph_Based.get_movie_scores(movie_sequence)
     scores4 = submodule_04_Transformer.get_movie_scores(movie_sequence, model_path='NN_Models_Transformer/TransformerRecModel_50.pth')
     
     print("Shapes of the scores:")
+    print("Scores shape for Image Based:{}".format(scores1.shape))
     print("Scores shape for Content Based:{}".format(scores2.shape))
     print("Scores shape for Graph Based:{}".format(scores3.shape))
     print("Scores shape for Transformer:{}".format(scores4.shape))
 
     # Top 10 movies based on each submodule
     print("\nTop 10 Movie Recommendations based on each submodule:")
+    top_indices_image_based = scores1.argsort()[::-1][:10]
+    print("Top 10 Movie Recommendations based on Image Based: {} = {}".format(movie_titles[top_indices_image_based], scores1[top_indices_image_based]))
     top_indices_content_based = scores2.argsort()[::-1][:10]
     print("Top 10 Movie Recommendations based on Content Based: {} = {}".format(movie_titles[top_indices_content_based], scores2[top_indices_content_based]))
     top_indices_graph_based = scores3.argsort()[::-1][:10]
@@ -50,7 +53,7 @@ def main():
 
     # Compute weighted score for each movie
     weighted_scores = [
-        # scores1[i] * weights['submodule_01'] +
+        scores1[i] * weights['submodule_01'] +
         scores2[i] * weights['submodule_02'] +
         scores3[i] * weights['submodule_03'] +
         scores4[i] * weights['submodule_04']

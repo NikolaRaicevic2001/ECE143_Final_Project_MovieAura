@@ -140,7 +140,7 @@ def get_movie_scores(movie_sequence, feature_path="./PosterFeatures/movie_featur
 
     # Process content-based metadata
     metadata['Genres'] = metadata['Genres'].fillna("")  # Handle missing genres
-    vectorizer = CountVectorizer(tokenizer=lambda x: x.split('|'))
+    vectorizer = CountVectorizer(tokenizer=lambda x: x.split(','))
     genre_features = vectorizer.fit_transform(metadata['Genres']).toarray()
 
     metadata['Description'] = metadata['Description'].fillna("")  # Handle missing descriptions
@@ -159,15 +159,15 @@ def get_movie_scores(movie_sequence, feature_path="./PosterFeatures/movie_featur
     # print(f"Shape of description_features_scaled: {description_features_scaled.shape}")
 
     # Ensure all feature arrays have matching lengths
-    min_length = min(
-        visual_embeddings_scaled.shape[0], 
-        genre_features_scaled.shape[0], 
-        description_features_scaled.shape[0]
-    )
-    visual_embeddings_scaled = visual_embeddings_scaled[:min_length]
-    genre_features_scaled = genre_features_scaled[:min_length]
-    description_features_scaled = description_features_scaled[:min_length]
-    metadata = metadata.iloc[:min_length]
+    # min_length = min(
+    #     visual_embeddings_scaled.shape[0], 
+    #     genre_features_scaled.shape[0], 
+    #     description_features_scaled.shape[0]
+    # )
+    # visual_embeddings_scaled = visual_embeddings_scaled[:min_length]
+    # genre_features_scaled = genre_features_scaled[:min_length]
+    # description_features_scaled = description_features_scaled[:min_length]
+    # metadata = metadata.iloc[:min_length]
 
     # Combine features
     combined_features = np.hstack(
@@ -177,7 +177,7 @@ def get_movie_scores(movie_sequence, feature_path="./PosterFeatures/movie_featur
     similarity_matrix = cosine_similarity(combined_features)
 
     # Aggregate similarity scores for multiple input movies
-    def calculate_similarity_scores(titles):
+    def calculate_similarity_scores(titles, similarity_matrix):
         """
         Calculate similarity scores for all movies based on a sequence of input titles.
 
@@ -204,7 +204,7 @@ def get_movie_scores(movie_sequence, feature_path="./PosterFeatures/movie_featur
         scores = scores / np.sum(scores)
         return scores
 
-    movie_scores = calculate_similarity_scores(movie_sequence)
+    movie_scores = calculate_similarity_scores(movie_sequence, similarity_matrix)
     return movie_scores
 
 
