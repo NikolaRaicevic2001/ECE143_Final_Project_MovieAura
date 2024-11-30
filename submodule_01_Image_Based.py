@@ -7,6 +7,11 @@ from tensorflow.keras.applications import ResNet50
 from tensorflow.keras.applications.resnet50 import preprocess_input
 from tensorflow.keras.preprocessing.image import img_to_array
 import requests
+import numpy as np
+import pandas as pd
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 
 def load_and_preprocess_image(url_path=None, target_size=(224, 224)):
     try:
@@ -30,11 +35,8 @@ def extract_features(data, model, num_movies, TMDB_prefix="https://image.tmdb.or
     features = []
     success_count = 0
     poster_col = data['poster_path']
-    # id_col = data['id']
     
     for row_idx in range(num_movies):
-        # movie_idx = id_col[row_idx]
-
         if poster_col[row_idx] and poster_col[row_idx] != float('nan'):
             try:
                 url = TMDB_prefix + poster_col[row_idx]
@@ -125,19 +127,9 @@ def load_existing_features(file_path):
         print(f"No existing features file found at {file_path}. Starting fresh.")
         return None
 
-def get_movie_scores(movie_sequence):
-    import numpy as np
-    import pandas as pd
-    from sklearn.metrics.pairwise import cosine_similarity
-    from sklearn.preprocessing import MinMaxScaler
-    from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
-
-    # Load datasets
-    visual_embeddings = np.load("PosterFeatures/movie_features_merge_new.npy", allow_pickle=True)
+def get_movie_scores(movie_sequence, feature_path="./PosterFeatures/movie_features_merge_new.npy"):
+    visual_embeddings = np.load(feature_path, allow_pickle=True)
     metadata = pd.read_csv("Datasets/Movies_Merged.csv")  # Contains 'movie_id', 'Genres', 'Description', etc.
-
-    print(f'{len(visual_embeddings)=}')
-    print(f'{len(metadata)=}')
 
     # Handle missing or None values in visual_embeddings
     visual_embeddings = np.array([x[0] if x is not None else np.zeros_like(visual_embeddings[0][0]) for x in visual_embeddings])
@@ -166,9 +158,9 @@ def get_movie_scores(movie_sequence):
     genre_features_scaled = scaler.fit_transform(genre_features)
     description_features_scaled = scaler.fit_transform(description_features)
 
-    print(f"Shape of visual_embeddings_scaled: {visual_embeddings_scaled.shape}")
-    print(f"Shape of genre_features_scaled: {genre_features_scaled.shape}")
-    print(f"Shape of description_features_scaled: {description_features_scaled.shape}")
+    # print(f"Shape of visual_embeddings_scaled: {visual_embeddings_scaled.shape}")
+    # print(f"Shape of genre_features_scaled: {genre_features_scaled.shape}")
+    # print(f"Shape of description_features_scaled: {description_features_scaled.shape}")
 
     # Ensure all feature arrays have matching lengths
     min_length = min(
@@ -188,52 +180,38 @@ def get_movie_scores(movie_sequence):
 
     similarity_matrix = cosine_similarity(combined_features)
 
-    # Recommendation function
-    def recommend_movies_by_titles(titles, top_n=10):
+    # Aggregate similarity scores for multiple input movies
+    def calculate_similarity_scores(titles):
         """
-        Recommend movies based on a sequence of movie titles.
+        Calculate similarity scores for all movies based on a sequence of input titles.
 
         Args:
-        - titles (list of str): List of movie titles for which to find recommendations.
-        - top_n (int): Number of recommendations to return for each title.
+        - titles (list of str): List of movie titles for similarity calculation.
 
         Returns:
-        - recommendations (pd.DataFrame): Recommended movies with similarity scores.
+        - np.array: Aggregated similarity scores for all movies in the dataset.
         """
         if not isinstance(titles, list):
             raise ValueError("Input titles must be a list of strings.")
         
-        recommendations = []
-        
+        # Initialize an array to accumulate similarity scores
+        scores = np.zeros(similarity_matrix.shape[0])
+
         for title in titles:
             if title not in metadata['title'].values:
                 print(f"Warning: '{title}' not found in the metadata. Skipping.")
                 continue
             
             movie_index = metadata[metadata['title'] == title].index[0]
-            similarity_scores = similarity_matrix[movie_index]
-            
-            # Get indices of top_n similar movies
-            top_indices = np.argsort(similarity_scores)[::-1][1:top_n + 1]  # Exclude the input movie itself
-            
-            # Retrieve recommended movies
-            movie_recommendations = metadata.iloc[top_indices].copy()
-            movie_recommendations['similarity_score'] = similarity_scores[top_indices]
-            # movie_recommendations['based_on'] = title  # Add the input title for context
-            recommendations.append(movie_recommendations[['id', 'title', 'similarity_score']])
+            scores += similarity_matrix[movie_index]  # Add similarity scores for this movie
         
-        # Combine all recommendations into a single DataFrame
-        if recommendations:
-            return pd.concat(recommendations, ignore_index=True)
-        else:
-            return pd.DataFrame(columns=['id', 'title', 'similarity_score', 'based_on'])
+        scores = scores / np.sum(scores)
+        return scores
 
-    # Example usage
-    recommendations = recommend_movies_by_titles(movie_sequence)
-    # print(len(recommendations))
-    return recommendations
-    # print("Recommended Movies:")
-    # print(recommendations)
+    movie_scores = calculate_similarity_scores(movie_sequence)
+
+    return movie_scores
+
 
 if __name__ == "__main__":
     # data = pd.read_csv('Datasets/Movies_Merged.csv')
