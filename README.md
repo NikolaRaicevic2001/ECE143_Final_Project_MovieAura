@@ -8,7 +8,34 @@ Gathers all the movie scores from four submodules and weights them according to 
 Contains a class that processes dataset returning different fields that could be relevant for submodules 
 
 # Submodule_01.py - 
+   This submodule implements a Hybrid Content-Based Filtering System to recommend movies by integrating visual, genre, and textual attributes. It leverages multiple feature types and calculates similarity scores to identify movies similar to user input.
 
+### Key Features
+1. Feature Combination
+   Combines multiple attributes of a movie (e.g., visual embeddings, genres, descriptions) into a unified feature matrix for robust similarity calculations.
+   - Visual Embeddings (ResNet-50): Captures visual features from movie posters.
+   - Genres: Encoded as binary features.
+   - Descriptions: Processed using TF-IDF vectorization.
+This ensures recommendations consider both thematic and visual similarity.
+
+2. Data Normalization
+   Applies MinMaxScaler to scale visual, genre, and textual features to a uniform range. This ensures equal importance across different feature types.
+
+3. Similarity Calculation
+   - Computes cosine similarity scores based on the combined feature matrix:
+   - Measures the similarity between movies using visual, textual, and genre features.
+   - Supports aggregated similarity scores for multiple input movie titles.
+4. Flexible Input
+   Accepts one or more movie titles as input:
+   - Matches input movies against the dataset.
+   - Returns a ranked list of top-N similar movies for each input title.
+
+### How It Works
+1. Feature Extraction: Extract visual embeddings, encode genres, and vectorize descriptions using TF-IDF.
+2. Data Normalization: Normalize extracted features for uniformity.
+3. Feature Combination: Combine visual, genre, and text features into a single feature matrix.
+4. Similarity Computation: Calculate cosine similarity scores between the input movies and all movies in the dataset.
+5. Recommendation Generation: Return aggregated similarity scores and a ranked list of recommendations for user-specified movies.
 # Submodule_02_Content_Based.py -
 
 This submodule implements a **Content-Based Filtering** system to recommend movies based on weighted features. It enhances movie attributes and calculates similarity scores to identify similar movies.
