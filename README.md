@@ -7,7 +7,7 @@ Gathers all the movie scores from four submodules and weights them according to 
 # Data_Processing.py
 Contains a class that processes dataset returning different fields that could be relevant for submodules 
 
-# Submodule_01.py - 
+# Submodule_01.py
    This submodule implements a Hybrid Content-Based Filtering System to recommend movies by integrating visual, genre, and textual attributes. It leverages multiple feature types and calculates similarity scores to identify movies similar to user input.
 
 ### Key Features
@@ -36,7 +36,8 @@ This ensures recommendations consider both thematic and visual similarity.
 3. Feature Combination: Combine visual, genre, and text features into a single feature matrix.
 4. Similarity Computation: Calculate cosine similarity scores between the input movies and all movies in the dataset.
 5. Recommendation Generation: Return aggregated similarity scores and a ranked list of recommendations for user-specified movies.
-# Submodule_02_Content_Based.py -
+
+# Submodule_02_Content_Based.py
 
 This submodule implements a **Content-Based Filtering** system to recommend movies based on weighted features. It enhances movie attributes and calculates similarity scores to identify similar movies.
 
@@ -89,7 +90,7 @@ Normalized attributes:
 - **Graph Nodes**: Treats movies as **nodes** and assigns **edge weights** based on combined BM25/TF-IDF and numeric similarity scores. 
 - **PageRank**: Computes **global importance scores** for each movie. Iteratively refines rankings based on graph connectivity, emphasizing both direct similarity and network-wide relationships. 
 
-# Submodule_04.py - 
+# Submodule_04_Transformer.py
 
 This submodule implements **Transformer Encoder** system to recommend movies based on numerical features. The model used is SASRec/BERT4Rec based Transformer-based arhitecture designed specifically for recommendation tasks. The model uses self-attention mechanism to model user sequence and can handle both sequential dependancies (past movies) and incorporate information or context based embeddings. 
 
