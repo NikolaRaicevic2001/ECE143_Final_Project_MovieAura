@@ -1,4 +1,3 @@
-# submodule1.py
 import os
 import numpy as np
 import pandas as pd
@@ -8,10 +7,6 @@ from tensorflow.keras.applications import ResNet50
 from tensorflow.keras.applications.resnet50 import preprocess_input
 from tensorflow.keras.preprocessing.image import img_to_array
 import requests
-
-data = pd.read_csv('Datasets/Movies_Merged.csv')
-
-model = ResNet50(weights='imagenet', include_top=False, pooling='avg')
 
 def load_and_preprocess_image(url_path=None, target_size=(224, 224)):
     try:
@@ -30,7 +25,7 @@ def load_and_preprocess_image(url_path=None, target_size=(224, 224)):
         print(f"Error processing image: {e}")
         return None
 
-def extract_features(data, num_movies, TMDB_prefix="https://image.tmdb.org/t/p/w500"):
+def extract_features(data, model, num_movies, TMDB_prefix="https://image.tmdb.org/t/p/w500"):
     movie_sequence = []
     features = []
     success_count = 0
@@ -70,10 +65,8 @@ def save_features(features, file_path):
     np.save(file_path, features)
     print(f"Features saved to {file_path}")
 
-features, success_count, movie_sequence = extract_features(data, len(data))
-save_features(features, f"PosterFeatures/movie_features_merge.npy")
 
-print(movie_sequence)
+
 def load_features(file_path):
     if os.path.exists(file_path):
         print(f"Loading features from {file_path}")
@@ -82,80 +75,180 @@ def load_features(file_path):
         print(f"No saved features found at {file_path}. Please extract features first.")
         return None
 
-def get_movie_scores(movie_titles, top_k):
+
+def fetch_missing_poster_paths(data, model, api_key, features, search_url="https://api.themoviedb.org/3/search/movie"):
     """
-    Recommend top_k movies based on the average similarity to multiple input movies.
-    
+    Fetch missing poster paths from TMDB for rows where 'poster_path' is NaN.
+
     Args:
-    movie_indices (list): List of movie indices for which to find recommendations.
-    top_k (int): Number of recommendations to return.
+        data (pd.DataFrame): The dataset containing movie titles and poster paths.
+        api_key (str): TMDB API key.
+        search_url (str): TMDB search API endpoint.
 
     Returns:
-    DataFrame: Top-k recommended movies.
-    
+        pd.DataFrame: Updated dataset with missing 'poster_path' filled.
     """
-    features = load_features("PosterFeatures/movie_features_merge.npy")
-    features = np.array([feat for feat in features if feat is not None])
-    similarity_matrix = cosine_similarity(features)
-    print(similarity_matrix)
+    missing_posters = data[data['poster_path'].isna()]  # Filter rows with missing posters
 
-    # Aggregate similarity scores for the input movies
-    aggregated_similarity = np.mean(similarity_matrix[movie_titles], axis=0)
-    similar_indices = np.argsort(aggregated_similarity)[::-1]
-    similar_indices = [idx for idx in similar_indices if idx not in movie_titles]
-    
-    top_similar_indices = similar_indices[:top_k]
-    
-    recommendations = data.iloc[top_similar_indices]
-    return recommendations
+    for index, row in missing_posters.iterrows():
+        idx = row['id']
+        title = row['Title']  # Replace with your title column name
+        year = row.get('Release Date', None)  # Optional if you have a release year column
 
-
-#================================
-
-# Filter rows with missing poster_path
-missing_poster_indices = data[data['poster_path'].isna()].index
-
-# Load previously saved features
-existing_features = np.load('PosterFeatures/movie_features_merge.npy', allow_pickle=True)
-
-# Process only missing posters
-def fetch_missing_posters(missing_indices, data, existing_features, TMDB_prefix="https://image.tmdb.org/t/p/w500"):
-    updated_features = existing_features.tolist()  # Convert to list for easier updates
-    
-    for row_idx in missing_indices:
-        title = data.loc[row_idx, 'Title']  # Movie title (optional, for debugging)
-        print(f"Processing missing poster for: {title} (Index {row_idx})")
-        
-        # Fetch the missing poster
-        poster_path = data.loc[row_idx, 'poster_path']
-        if pd.notna(poster_path):  # Ensure the path is valid
-            try:
-                url = TMDB_prefix + poster_path
+        # Query TMDB for the movie
+        params = {
+            'api_key': api_key,
+            'query': title,
+            'year': year
+        }
+        response = requests.get(search_url, params=params)
+        if response.status_code == 200:
+            results = response.json().get('results', [])
+            if results:
+                # poster_path = results[0].get('poster_path')
+                # url = search_url + poster_path
                 preprocessed_image = load_and_preprocess_image(url_path=url)
-                if preprocessed_image is not None:
-                    # Predict features for the poster
-                    feature = model.predict(preprocessed_image)
-                    updated_features[row_idx] = feature.flatten()
-                    print(f"Poster features updated for index {row_idx}")
-            except Exception as e:
-                print(f"Error processing poster for {title}: {e}")
+                feature = model.predict(preprocessed_image)
+                features.append(feature.flatten())
+            else:
+                print(f"No results found for '{title}' ({year})")
         else:
-            print(f"No valid poster path for index {row_idx}")
+            print(f"Error fetching poster for '{title}': {response.status_code}")
+
+    return features
+
+# Load existing features
+def load_existing_features(file_path):
+    try:
+        return np.load(file_path, allow_pickle=True)
+    except FileNotFoundError:
+        print(f"No existing features file found at {file_path}. Starting fresh.")
+        return None
+
+
+# data = pd.read_csv('Datasets/Movies_Merged.csv')
+
+# model = ResNet50(weights='imagenet', include_top=False, pooling='avg')
+# Usage example
+# features, success_count, movie_sequence = extract_features(data, model, len(data))
+# save_features(features, f"PosterFeatures/movie_features_merge_new.npy")
+# api_key = "7d54316704e8c29ee220d9b6484f6798"
+# features = load_features('PosterFeatures/movie_features_merge_new.npy')
+
+def get_movie_scores(movie_sequence):
+    import numpy as np
+    import pandas as pd
+    from sklearn.metrics.pairwise import cosine_similarity
+    from sklearn.preprocessing import MinMaxScaler
+    from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
+
+    # Load datasets
+    visual_embeddings = np.load("PosterFeatures/movie_features_merge_new.npy", allow_pickle=True)
+    metadata = pd.read_csv("Datasets/Movies_Merged.csv")  # Contains 'movie_id', 'Genres', 'Description', etc.
+
+    print(f'{len(visual_embeddings)=}')
+    print(f'{len(metadata)=}')
+
+    # Handle missing or None values in visual_embeddings
+    visual_embeddings = np.array([x[0] if x is not None else np.zeros_like(visual_embeddings[0][0]) for x in visual_embeddings])
+
+    # Ensure the dimensions of visual_embeddings match metadata
+    min_length = min(len(visual_embeddings), len(metadata))
+    visual_embeddings = visual_embeddings[:min_length]
+    metadata = metadata.iloc[:min_length]
+
+    # Process content-based metadata
+    metadata['Genres'] = metadata['Genres'].fillna("")  # Handle missing genres
+    vectorizer = CountVectorizer(tokenizer=lambda x: x.split('|'))
+    genre_features = vectorizer.fit_transform(metadata['Genres']).toarray()
+
+    metadata['Description'] = metadata['Description'].fillna("")  # Handle missing descriptions
+    tfidf = TfidfVectorizer(max_features=1000)
+    description_features = tfidf.fit_transform(metadata['Description']).toarray()
+
+    # Normalize features
+    if len(visual_embeddings.shape) == 1:
+        visual_embeddings = visual_embeddings.reshape(-1, 1)
+    scaler = MinMaxScaler()
+    visual_embeddings = np.nan_to_num(visual_embeddings, nan=0.0, posinf=0.0, neginf=0.0)
+    visual_embeddings_scaled = scaler.fit_transform(visual_embeddings)
+
+    genre_features_scaled = scaler.fit_transform(genre_features)
+    description_features_scaled = scaler.fit_transform(description_features)
+
+    print(f"Shape of visual_embeddings_scaled: {visual_embeddings_scaled.shape}")
+    print(f"Shape of genre_features_scaled: {genre_features_scaled.shape}")
+    print(f"Shape of description_features_scaled: {description_features_scaled.shape}")
+
+    # Ensure all feature arrays have matching lengths
+    min_length = min(
+        visual_embeddings_scaled.shape[0], 
+        genre_features_scaled.shape[0], 
+        description_features_scaled.shape[0]
+    )
+    visual_embeddings_scaled = visual_embeddings_scaled[:min_length]
+    genre_features_scaled = genre_features_scaled[:min_length]
+    description_features_scaled = description_features_scaled[:min_length]
+    metadata = metadata.iloc[:min_length]
+
+    # Combine features
+    combined_features = np.hstack(
+        (visual_embeddings_scaled, genre_features_scaled, description_features_scaled)
+    )
+
+    similarity_matrix = cosine_similarity(combined_features)
+
+    # Recommendation function
+    def recommend_movies_by_titles(titles, top_n=10):
+        """
+        Recommend movies based on a sequence of movie titles.
+
+        Args:
+        - titles (list of str): List of movie titles for which to find recommendations.
+        - top_n (int): Number of recommendations to return for each title.
+
+        Returns:
+        - recommendations (pd.DataFrame): Recommended movies with similarity scores.
+        """
+        if not isinstance(titles, list):
+            raise ValueError("Input titles must be a list of strings.")
+        
+        recommendations = []
+        
+        for title in titles:
+            if title not in metadata['title'].values:
+                print(f"Warning: '{title}' not found in the metadata. Skipping.")
+                continue
+            
+            movie_index = metadata[metadata['title'] == title].index[0]
+            similarity_scores = similarity_matrix[movie_index]
+            
+            # Get indices of top_n similar movies
+            top_indices = np.argsort(similarity_scores)[::-1][1:top_n + 1]  # Exclude the input movie itself
+            
+            # Retrieve recommended movies
+            movie_recommendations = metadata.iloc[top_indices].copy()
+            movie_recommendations['similarity_score'] = similarity_scores[top_indices]
+            movie_recommendations['based_on'] = title  # Add the input title for context
+            recommendations.append(movie_recommendations[['id', 'title', 'similarity_score', 'based_on']])
+        
+        # Combine all recommendations into a single DataFrame
+        if recommendations:
+            return pd.concat(recommendations, ignore_index=True)
+        else:
+            return pd.DataFrame(columns=['id', 'title', 'similarity_score', 'based_on'])
+
+    # Example usage
+    recommendations = recommend_movies_by_titles(movie_sequence)
     
-    return np.array(updated_features, dtype=object)
+    print("Recommended Movies:")
+    print(recommendations)
 
-# Update the features array with missing posters
-updated_features = fetch_missing_posters(missing_poster_indices, data, existing_features)
+if __name__ == "__main__":
+    movie_sequence = ['The Lord of the Rings: The Return of the King', 'The Lord of the Rings: The Fellowship of the Ring',
+                      'The Lord of the Rings: The Two Towers', 'The Matrix', 'The Dark Knight Rises', 'Interstellar',
+                      'Django Unchained', 'The Godfather', 'The Shawshank Redemption', 'The Dark Knight',
+                      'The Hobbit: An Unexpected Journey', 'The Hobbit: The Desolation of Smaug', 
+                      'The Hobbit: The Battle of the Five Armies']
 
-# Save the updated features array
-save_features(updated_features, "PosterFeatures/movie_features_merge_updated.npy")
-
-
-
-if __name__ == 'main':
-    # Example: Recommend movies for the first movie in the dataset
-    movie_index = []
-    recommended_movies, sim_list = get_movie_scores(movie_index, 5)
-
-    print("Recommended movies:")
-    print(recommended_movies[['title']])
+    get_movie_scores(movie_sequence)
