@@ -129,14 +129,14 @@ def get_movie_scores(movie_sequence, feature_path="./PosterFeatures/movie_featur
         visual_embeddings = visual_embeddings.reshape(-1, 1)
     num_embeddings_rows = len(visual_embeddings)
 
-    print(f"{num_embeddings_rows=}, {len(metadata)=}, {visual_embeddings.shape=}")
+    # print(f"{num_embeddings_rows=}, {len(metadata)=}, {visual_embeddings.shape=}")
 
     if num_embeddings_rows < len(metadata):
         padding_rows = len(metadata) - num_embeddings_rows
         zero_padding = np.zeros((padding_rows, visual_embeddings.shape[1]))
         visual_embeddings = np.vstack([visual_embeddings, zero_padding])
 
-    print(f"Padded visual_embeddings shape: {visual_embeddings.shape}")
+    # print(f"Padded visual_embeddings shape: {visual_embeddings.shape}")
 
     # Process content-based metadata
     metadata['Genres'] = metadata['Genres'].fillna("")  # Handle missing genres

@@ -5,7 +5,7 @@ import submodule_04_Transformer
 
 # Define weights for each module based on importance
 weights = {
-    'submodule_01': 1,
+    'submodule_01': 50,
     'submodule_02': 10,
     'submodule_03': 1,
     'submodule_04': 100,
@@ -29,7 +29,7 @@ def main():
     movie_titles = movie_embeddings['Title'].values
 
     # Retrieve scores from each module
-    scores1 = submodule_01_Image_Based.get_movie_scores(movie_sequence, feature_path='./PosterFeatures/movie_features_0.npy')
+    scores1 = submodule_01_Image_Based.get_movie_scores(movie_sequence, feature_path='./PosterFeatures/movie_features_merge_new.npy')
     scores2 = submodule_02_Content_Based.get_movie_scores(movie_sequence, path='./Datasets/Movies_Merged.csv')
     scores3 = submodule_03_Graph_Based.get_movie_scores(movie_sequence)
     scores4 = submodule_04_Transformer.get_movie_scores(movie_sequence, model_path='NN_Models_Transformer/TransformerRecModel_50.pth')

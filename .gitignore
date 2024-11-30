@@ -2,6 +2,7 @@
 Dataset_Processed/Movie_Embeddings.pkl
 Datasets/16k_Movies.csv
 Datasets/TMDB_movie_dataset_v11.csv
+PosterFeatures/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -37,7 +38,6 @@ sklearn-env
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
 *.spec
-PosterFeatures
 
 # Installer logs
 pip-log.txt
