@@ -125,16 +125,6 @@ def load_existing_features(file_path):
         print(f"No existing features file found at {file_path}. Starting fresh.")
         return None
 
-
-# data = pd.read_csv('Datasets/Movies_Merged.csv')
-
-# model = ResNet50(weights='imagenet', include_top=False, pooling='avg')
-# Usage example
-# features, success_count, movie_sequence = extract_features(data, model, len(data))
-# save_features(features, f"PosterFeatures/movie_features_merge_new.npy")
-# api_key = "7d54316704e8c29ee220d9b6484f6798"
-# features = load_features('PosterFeatures/movie_features_merge_new.npy')
-
 def get_movie_scores(movie_sequence):
     import numpy as np
     import pandas as pd
@@ -229,8 +219,8 @@ def get_movie_scores(movie_sequence):
             # Retrieve recommended movies
             movie_recommendations = metadata.iloc[top_indices].copy()
             movie_recommendations['similarity_score'] = similarity_scores[top_indices]
-            movie_recommendations['based_on'] = title  # Add the input title for context
-            recommendations.append(movie_recommendations[['id', 'title', 'similarity_score', 'based_on']])
+            # movie_recommendations['based_on'] = title  # Add the input title for context
+            recommendations.append(movie_recommendations[['id', 'title', 'similarity_score']])
         
         # Combine all recommendations into a single DataFrame
         if recommendations:
@@ -240,11 +230,20 @@ def get_movie_scores(movie_sequence):
 
     # Example usage
     recommendations = recommend_movies_by_titles(movie_sequence)
-    
-    print("Recommended Movies:")
-    print(recommendations)
+    # print(len(recommendations))
+    return recommendations
+    # print("Recommended Movies:")
+    # print(recommendations)
 
 if __name__ == "__main__":
+    # data = pd.read_csv('Datasets/Movies_Merged.csv')
+    # model = ResNet50(weights='imagenet', include_top=False, pooling='avg')
+    # # Usage example
+    # features, success_count, movie_sequence = extract_features(data, model, len(data))
+    # save_features(features, f"PosterFeatures/movie_features_merge_new.npy")
+    # api_key = "7d54316704e8c29ee220d9b6484f6798"
+    # features = load_features('PosterFeatures/movie_features_merge_new.npy')
+
     movie_sequence = ['The Lord of the Rings: The Return of the King', 'The Lord of the Rings: The Fellowship of the Ring',
                       'The Lord of the Rings: The Two Towers', 'The Matrix', 'The Dark Knight Rises', 'Interstellar',
                       'Django Unchained', 'The Godfather', 'The Shawshank Redemption', 'The Dark Knight',
