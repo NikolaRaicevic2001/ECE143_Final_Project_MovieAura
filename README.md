@@ -19,10 +19,8 @@ The project utilizes the following Python libraries:
   - `tensorflow` or `torch`: For transformer-based architectures.
   - `scikit-learn`: For TF-IDF vectorization, scaling, and cosine similarity.
   - `sklearn.metrics`: Used to get the precision_score, recall_score, f1_score during the training.
-- **Natural Language Processing**:
-  - `nltk`: For text preprocessing.
 - **Image Processing**:
-  - `torchvision`: For ResNet-50 embeddings.
+  - `torchvision` and `keras.applications`: For ResNet-50 embeddings.
 - **Graph-Based Algorithms**:
   - `networkx`: For graph construction and PageRank implementation.
 
