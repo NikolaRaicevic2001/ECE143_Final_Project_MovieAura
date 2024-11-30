@@ -77,47 +77,41 @@ def load_features(file_path):
         print(f"No saved features found at {file_path}. Please extract features first.")
         return None
 
-
-def fetch_missing_poster_paths(data, model, api_key, features, search_url="https://api.themoviedb.org/3/search/movie"):
+def fetch_missing_poster_paths(metadata, api_key, poster_base_url="https://image.tmdb.org/t/p/original"):
     """
-    Fetch missing poster paths from TMDB for rows where 'poster_path' is NaN.
+    Fetches missing poster paths for movies in the metadata and updates the dataset.
 
     Args:
-        data (pd.DataFrame): The dataset containing movie titles and poster paths.
-        api_key (str): TMDB API key.
-        search_url (str): TMDB search API endpoint.
+    - metadata (pd.DataFrame): A DataFrame containing movie metadata with a 'poster_path' column.
+    - api_key (str): The API key for accessing the external source (e.g., TMDB API).
+    - poster_base_url (str): Base URL for movie poster paths (default: TMDB).
 
     Returns:
-        pd.DataFrame: Updated dataset with missing 'poster_path' filled.
+    - pd.DataFrame: Updated metadata with missing poster paths filled.
     """
-    missing_posters = data[data['poster_path'].isna()]  # Filter rows with missing posters
+ 
+    # Identify movies missing poster paths
+    missing_posters = metadata[metadata['poster_path'].isnull()]
+    print(f"Found {len(missing_posters)} movies with missing poster paths.")
 
+    # Fetch missing poster paths using the API
     for index, row in missing_posters.iterrows():
-        idx = row['id']
-        title = row['Title']  # Replace with your title column name
-        year = row.get('Release Date', None)  # Optional if you have a release year column
-
-        # Query TMDB for the movie
-        params = {
-            'api_key': api_key,
-            'query': title,
-            'year': year
-        }
-        response = requests.get(search_url, params=params)
+        movie_id = row['imdb_id']
+        response = requests.get(f"https://api.themoviedb.org/3/movie/{movie_id}",
+                                params={"api_key": api_key})
         if response.status_code == 200:
-            results = response.json().get('results', [])
-            if results:
-                # poster_path = results[0].get('poster_path')
-                # url = search_url + poster_path
-                preprocessed_image = load_and_preprocess_image(url_path=url)
-                feature = model.predict(preprocessed_image)
-                features.append(feature.flatten())
+            movie_data = response.json()
+            poster_path = movie_data.get("poster_path")
+            if poster_path:
+                full_poster_path = f"{poster_base_url}{poster_path}"
+                metadata.at[index, 'poster_path'] = full_poster_path
+                print(f"Fetched poster path for movie_id {movie_id}: {full_poster_path}")
             else:
-                print(f"No results found for '{title}' ({year})")
+                print(f"No poster found for movie_id {movie_id}.")
         else:
-            print(f"Error fetching poster for '{title}': {response.status_code}")
+            print(f"Failed to fetch data for movie_id {movie_id}. HTTP Status: {response.status_code}")
 
-    return features
+    return metadata
 
 # Load existing features
 def load_existing_features(file_path):
@@ -130,14 +124,19 @@ def load_existing_features(file_path):
 def get_movie_scores(movie_sequence, feature_path="./PosterFeatures/movie_features_merge_new.npy"):
     visual_embeddings = np.load(feature_path, allow_pickle=True)
     metadata = pd.read_csv("Datasets/Movies_Merged.csv")  # Contains 'movie_id', 'Genres', 'Description', etc.
-
-    # Handle missing or None values in visual_embeddings
     visual_embeddings = np.array([x[0] if x is not None else np.zeros_like(visual_embeddings[0][0]) for x in visual_embeddings])
+    if len(visual_embeddings.shape) == 1:
+        visual_embeddings = visual_embeddings.reshape(-1, 1)
+    num_embeddings_rows = len(visual_embeddings)
 
-    # Ensure the dimensions of visual_embeddings match metadata
-    min_length = min(len(visual_embeddings), len(metadata))
-    visual_embeddings = visual_embeddings[:min_length]
-    metadata = metadata.iloc[:min_length]
+    print(f"{num_embeddings_rows=}, {len(metadata)=}, {visual_embeddings.shape=}")
+
+    if num_embeddings_rows < len(metadata):
+        padding_rows = len(metadata) - num_embeddings_rows
+        zero_padding = np.zeros((padding_rows, visual_embeddings.shape[1]))
+        visual_embeddings = np.vstack([visual_embeddings, zero_padding])
+
+    print(f"Padded visual_embeddings shape: {visual_embeddings.shape}")
 
     # Process content-based metadata
     metadata['Genres'] = metadata['Genres'].fillna("")  # Handle missing genres
@@ -147,10 +146,7 @@ def get_movie_scores(movie_sequence, feature_path="./PosterFeatures/movie_featur
     metadata['Description'] = metadata['Description'].fillna("")  # Handle missing descriptions
     tfidf = TfidfVectorizer(max_features=1000)
     description_features = tfidf.fit_transform(metadata['Description']).toarray()
-
-    # Normalize features
-    if len(visual_embeddings.shape) == 1:
-        visual_embeddings = visual_embeddings.reshape(-1, 1)
+    
     scaler = MinMaxScaler()
     visual_embeddings = np.nan_to_num(visual_embeddings, nan=0.0, posinf=0.0, neginf=0.0)
     visual_embeddings_scaled = scaler.fit_transform(visual_embeddings)
@@ -209,7 +205,6 @@ def get_movie_scores(movie_sequence, feature_path="./PosterFeatures/movie_featur
         return scores
 
     movie_scores = calculate_similarity_scores(movie_sequence)
-
     return movie_scores
 
 
@@ -228,4 +223,5 @@ if __name__ == "__main__":
                       'The Hobbit: An Unexpected Journey', 'The Hobbit: The Desolation of Smaug', 
                       'The Hobbit: The Battle of the Five Armies']
 
-    get_movie_scores(movie_sequence)
+    movie_scores = get_movie_scores(movie_sequence)
+
