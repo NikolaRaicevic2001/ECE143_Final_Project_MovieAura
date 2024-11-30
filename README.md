@@ -7,7 +7,7 @@ Gathers all the movie scores from four submodules and weights them according to 
 # Data_Processing.py
 Contains a class that processes dataset returning different fields that could be relevant for submodules 
 
-# Submodule_01.py
+# Submodule_01.py - 
    This submodule implements a Hybrid Content-Based Filtering System to recommend movies by integrating visual, genre, and textual attributes. It leverages multiple feature types and calculates similarity scores to identify movies similar to user input.
 
 ### Key Features

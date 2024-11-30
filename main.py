@@ -1,4 +1,4 @@
-# import submodule_01
+import submodule_01_Image_Based
 import submodule_02_Content_Based
 # import submodule_03
 import submodule_04_Transformer 
@@ -29,7 +29,7 @@ def main():
     movie_titles = movie_embeddings['Title'].values
 
     # Retrieve scores from each module
-    # scores1 = submodule_01.get_movie_scores(movie_sequence)
+    scores1 = submodule_01_Image_Based.get_movie_scores(movie_sequence)
     scores2 = submodule_02_Content_Based.get_movie_scores(movie_sequence, path='./Datasets/Movies_Merged.csv')
     # scores3 = submodule_03.get_movie_scores(movie_sequence)
     scores4 = submodule_04_Transformer.get_movie_scores(movie_sequence, model_path='NN_Models/TransformerRecModel_50.pth')
