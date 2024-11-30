@@ -12,6 +12,9 @@ This project aims to develop a personalized movie recommender system that delive
    
 ## Third-Party Modules
 The project utilizes the following Python libraries:
+- **Data Visualization**:
+  - `seaborn`: For creating advanced, statistical plots.
+  - `matplotlib`: For generating standard visualizations and customizing plots.
 - **Machine Learning and Deep Learning**:
   - `tensorflow` or `torch`: For transformer-based architectures.
   - `scikit-learn`: For TF-IDF vectorization, scaling, and cosine similarity.
