@@ -6,9 +6,9 @@ import submodule_04_Transformer
 # Define weights for each module based on importance
 weights = {
     'submodule_01': 1,
-    'submodule_02': 1,
+    'submodule_02': 10,
     'submodule_03': 1,
-    'submodule_04': 10,
+    'submodule_04': 100,
 }
 
 def main():
@@ -29,21 +29,22 @@ def main():
     movie_titles = movie_embeddings['Title'].values
 
     # Retrieve scores from each module
-    scores1 = submodule_01_Image_Based.get_movie_scores(movie_sequence)
+    # scores1 = submodule_01_Image_Based.get_movie_scores(movie_sequence)
     scores2 = submodule_02_Content_Based.get_movie_scores(movie_sequence, path='./Datasets/Movies_Merged.csv')
     scores3 = submodule_03_Graph_Based.get_movie_scores(movie_sequence)
     scores4 = submodule_04_Transformer.get_movie_scores(movie_sequence, model_path='NN_Models_Transformer/TransformerRecModel_50.pth')
     
     print("Shapes of the scores:")
     print("Scores shape for Content Based:{}".format(scores2.shape))
+    print("Scores shape for Graph Based:{}".format(scores3.shape))
     print("Scores shape for Transformer:{}".format(scores4.shape))
 
     # Top 10 movies based on each submodule
     print("\nTop 10 Movie Recommendations based on each submodule:")
     top_indices_content_based = scores2.argsort()[::-1][:10]
     print("Top 10 Movie Recommendations based on Content Based: {} = {}".format(movie_titles[top_indices_content_based], scores2[top_indices_content_based]))
-    top_indices_transformer = scores3.argsort()[::-1][:10]
-    print("Top 10 Movie Recommendations based on Graph Based: {} = {}".format(movie_titles[top_indices_transformer], scores4[top_indices_transformer]))
+    top_indices_graph_based = scores3.argsort()[::-1][:10]
+    print("Top 10 Movie Recommendations based on Graph Based: {} = {}".format(movie_titles[top_indices_graph_based], scores3[top_indices_graph_based]))
     top_indices_transformer = scores4.argsort()[::-1][:10]
     print("Top 10 Movie Recommendations based on Transformer: {} = {}".format(movie_titles[top_indices_transformer], scores4[top_indices_transformer]))
 

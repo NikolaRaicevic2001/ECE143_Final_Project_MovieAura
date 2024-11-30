@@ -96,7 +96,6 @@ def personalized_pagerank_multiple(movies_data, graph, start_nodes, alpha=0.15):
     total_score = sum(pagerank_scores.values())
     normalized_scores = np.array([score / total_score for score in sorted_scores])
 
-
     return normalized_scores
 
 
