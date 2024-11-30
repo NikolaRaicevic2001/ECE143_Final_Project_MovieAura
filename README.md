@@ -5,10 +5,10 @@ This project aims to develop a personalized movie recommender system that delive
 Gathers all the movie scores from four submodules and weights them according to the relevance of each submodule to derive a final score to be sorted. From the sorted list the first five movies are chosen as the user recommendations.
 
 # Data_Processing.py
-Contains a class that processes dataset returning different fields that could be relevant for submodules 
+Contains a class that processes dataset returning different fields that could be relevant for submodules. The Movies_Merged.csv file is created that merges all the relevant fields from the 16000-movies-1910-2024-metacritic and tmdb-movies-dataset-2023-930k-movies datasets. The two datasets were merged according to the movie title match from both datasets.
 
 # Submodule_01_Image_Based.py 
-   This submodule implements a Hybrid Content-Based Filtering System to recommend movies by integrating visual, genre, and textual attributes. It leverages multiple feature types and calculates similarity scores to identify movies similar to user input.
+This submodule implements a Hybrid Content-Based Filtering System to recommend movies by integrating visual, genre, and textual attributes. It leverages multiple feature types and calculates similarity scores to identify movies similar to user input.  
 
 ### Key Features
 1. Feature Combination
@@ -28,7 +28,7 @@ This ensures recommendations consider both thematic and visual similarity.
 4. Flexible Input
    Accepts one or more movie titles as input:
    - Matches input movies against the dataset.
-   - Returns a ranked list of top-N similar movies for each input title.
+   - Returns a probabilities of all movies in the dataset to be recommended. 
 
 ### How It Works
 1. Feature Extraction: Extract visual embeddings, encode genres, and vectorize descriptions using TF-IDF.
@@ -38,7 +38,6 @@ This ensures recommendations consider both thematic and visual similarity.
 5. Recommendation Generation: Return aggregated similarity scores and a ranked list of recommendations for user-specified movies.
 
 # Submodule_02_Content_Based.py
-
 This submodule implements a **Content-Based Filtering** system to recommend movies based on weighted features. It enhances movie attributes and calculates similarity scores to identify similar movies.
 
 ### Key Features
@@ -64,7 +63,6 @@ This submodule implements a **Content-Based Filtering** system to recommend movi
 4. Return aggregated similarity scores for user-specified movie titles.
 
 # **Submodule_03_Graph_Based.py**
-
 This submodule implements a **Graph-Based Filtering system** combining **BM25/TF-IDF similarity** with the **PageRank algorithm** to recommend movies, integrating both **textual** and **numeric features**.
 
 ## **Features**
@@ -79,7 +77,7 @@ Normalized attributes:
 
 ## **Workflow**
 ### **Text Similarity**  
-- **TF-IDF Vectorization**: Uses TF-IDF to process combined movie features, similar to Submodule_02. 
+- **TF-IDF Vectorization**: Uses TF-IDF to process combined movie features, similar to Submodule_02 and Submodule_01. 
 - **BM25 Scoring**: Leverages BM25, a robust ranking function that emphasizes term relevance by accounting for term frequency and document length.
 
 ### **Numeric Similarity**  
