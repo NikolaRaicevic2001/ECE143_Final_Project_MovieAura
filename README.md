@@ -1,6 +1,27 @@
 # ECE143_Final_Project
 This project aims to develop a personalized movie recommender system that delivers tailored recommendations based on user viewing history, genre preferences, and similar user preferences. This recommender can enhance user satisfaction by simplifying the content discovery process and minimizing search time.
 
+## File Structure
+- **`main.py`**: Top module which combines submodule.
+- **`Data_Processing.py`**: Merging different datasets and extract features.
+-### Submodules
+1. **`Submodule_01_Image_Based.py`**
+2. **`Submodule_02_Content_Based.py`**
+3. **`Submodule_03_Graph_Based.py`**
+4. **`Submodule_04_Transformer.py`**
+   
+## Third-Party Modules
+The project utilizes the following Python libraries:
+- **Machine Learning and Deep Learning**:
+  - `tensorflow` or `torch`: For transformer-based architectures.
+  - `scikit-learn`: For TF-IDF vectorization, scaling, and cosine similarity.
+- **Natural Language Processing**:
+  - `nltk` or similar libraries: For text preprocessing.
+- **Image Processing**:
+  - `torchvision` or `keras.applications`: For ResNet-50 embeddings.
+- **Graph-Based Algorithms**:
+  - `networkx`: For graph construction and PageRank implementation.
+
 # Main.py
 Gathers all the movie scores from four submodules and weights them according to the relevance of each submodule to derive a final score to be sorted. From the sorted list the first five movies are chosen as the user recommendations.
 
