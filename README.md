@@ -117,7 +117,7 @@ This submodule implements a **Graph-Based Filtering system** combining **BM25/TF
 - **PageRank**: Computes **global importance scores** for each movie. Iteratively refines rankings based on graph connectivity, emphasizing both direct similarity and network-wide relationships. 
 
 # Submodule_04_Transformer.py
-This submodule implements **Transformer Encoder** system to recommend movies based on numerical features. The model used is SASRec/BERT4Rec based Transformer-based arhitecture designed specifically for recommendation tasks. The model uses self-attention mechanism to model user sequence and can handle both sequential dependancies (past movies) and incorporate information or context based embeddings. 
+This submodule implements **Transformer Encoder** system to recommend movies based on numerical features. The model used is SASRec/BERT4Rec based Transformer-based architecture designed specifically for recommendation tasks. The model uses self-attention mechanism to model user sequence and can handle both sequential dependencies (past movies) and incorporate information or context based embeddings.
 
  - **Input Format**: The list of movies with their specific numerical embeddings including Adult movie, Genres, Production Country, Keywords, Description, Rating, Popularity, and Release Year. The Adult category was binary either true/false; Genres and Production Country was one-hot encoded; Rating, Popularity, and Release Year was normalized so that the features are in the range of 0 to 1; Keywords and Description features were extracted using pre-trained language model BERT to create a dense vector representation.
 
