@@ -5,6 +5,7 @@ This project aims to develop a personalized movie recommender system that delive
 - **`main.py`**: Top module which combines submodule.
 - **`Data_Processing.py`**: Merging different datasets and extract features.
 - **`Data_Visualization.ipynb`**: Jupyter Notebook for data visualization
+- **`Submodule_04_Processing_Data.ipynb`, Submodule_04_Training_Transformers.ipynb**: Notebooks for training and data processing for submodule 4
 ### Submodules
 1. **`Submodule_01_Image_Based.py`**
 2. **`Submodule_02_Content_Based.py`**
