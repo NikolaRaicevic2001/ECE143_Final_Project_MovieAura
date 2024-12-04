@@ -26,8 +26,10 @@ The project utilizes the following Python libraries:
   - `networkx`: For graph construction and PageRank implementation.
 
 ## Steps to Run
-1. Download `movie_features_merge_new.npy` and `Movie_Embeddings.pkl` from "https://drive.google.com/drive/folders/1pQiwsuW7wkabhcWuuibn4Weroiicl75S?usp=sharing"
-2. `python main.py`
+1. Download `movie_features.npy` and `Movie_Embeddings.pkl` from "https://drive.google.com/drive/folders/1pQiwsuW7wkabhcWuuibn4Weroiicl75S?usp=sharing"
+2. Place `movie_features.npy` in the directory called `PosterFeatures`
+3. Place `Movie_Embeddings.pkl` in the directory called `Dataset_Processed`
+4. Run command `python main.py`
 
 For custom inputs : update `movie_sequence` in `main.py`
 
